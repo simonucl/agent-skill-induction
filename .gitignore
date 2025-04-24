@@ -144,7 +144,7 @@ tmp.py
 .vscode/**
 
 # demo and results
-results/
+results/webarena.*
 
 .vscode/launch.json
 
