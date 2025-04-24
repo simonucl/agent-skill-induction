@@ -199,10 +199,10 @@ if __name__ == "__main__":
     parser.add_argument("--num_responses", type=int, default=1, help="Number of responses to generate.")
     parser.add_argument("--temperature", type=float, default=1.0, help="Temperature for sampling.")
 
-    parser.add_argument("--sys_msg_path", type=str, default="induce/promptsystem_message_memory.txt")
-    parser.add_argument("--instruction_path", type=str, default="induce/promptinstruction_memory.txt")
-    parser.add_argument("--few_shot_path", type=str, default="induce/promptshopping_memory.md")
-    parser.add_argument("--test_query_path", type=str, default="induce/prompttest_query.txt")
+    parser.add_argument("--sys_msg_path", type=str, default="induce/prompt/system_message_memory.txt")
+    parser.add_argument("--instruction_path", type=str, default="induce/prompt/instruction_memory.txt")
+    parser.add_argument("--few_shot_path", type=str, default="induce/prompt/shopping_memory.md")
+    parser.add_argument("--test_query_path", type=str, default="induce/prompt/test_query.txt")
 
     parser.add_argument("--template_id", type=str, default=None)
     parser.add_argument("--website", type=str, required=True,
