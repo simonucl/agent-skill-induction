@@ -123,7 +123,7 @@ def run_asi():
 
         # step 3: induce actions
         process = Popen([
-            "python", "-m", "induce.induce_actions_full",
+            "python", "-m", "induce.induce_actions",
             "--website", args.website,
             "--result_id_list", tid,
         ])
@@ -185,7 +185,7 @@ def run_veri_program():
         # step 3: induce actions
         orignal_content = open(f"actions/{args.website}.py", 'r').read()
         process = Popen([
-            "python", "-m", "induce.induce_actions_full",
+            "python", "-m", "induce.induce_actions",
             "--website", args.website,
             "--result_id_list", tid,
         ])
@@ -254,7 +254,7 @@ def run_mem_asi():
         # step 3: induce actions
         nlines = len(open(f"actions/{args.website}.py", 'r').readlines())
         process = Popen([
-            "python", "-m", "induce.induce_actions_full",
+            "python", "-m", "induce.induce_actions",
             "--website", args.website,
             "--result_id_list", tid,
         ])
