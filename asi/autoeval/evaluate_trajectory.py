@@ -110,6 +110,7 @@ def main():
     task_id = args.result_dir.split('/')[-1].split(".")[1]
     if '_' in task_id:
         task_id = task_id.split('_')[0]
+    os.makedirs("config_files", exist_ok=True)
     config_path = os.path.join("config_files", f"{task_id}.json")
     config = json.load(open(config_path))
 
@@ -164,7 +165,8 @@ def main():
         log_save_path=log_save_path, 
         model=args.model, eval_version=args.prompt,
     )
-    output_eval_path = os.path.join(args.result_dir, f"{args.model}_autoeval.json")
+    model_name = args.model.replace("/", "_")
+    output_eval_path = os.path.join(args.result_dir, f"{model_name}_autoeval.json")
     json.dump(eval_info, open(output_eval_path, 'w'))
 
 
@@ -173,8 +175,7 @@ if __name__ == "__main__":
     parser.add_argument("--result_dir", type=str, required=True,
                         help="Path to the result directory, e.g., 'webarena.0'.")
     # autoeval
-    parser.add_argument("--model", type=str, default="gpt-4o-2024-05-13",
-                        choices=["gpt-4o", "gpt-4o-2024-05-13"])
+    parser.add_argument("--model", type=str, default="gpt-4o-2024-05-13")
     parser.add_argument("--prompt", type=str, default="vision",
                         choices=["text", "vision"])
 

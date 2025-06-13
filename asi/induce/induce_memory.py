@@ -65,8 +65,8 @@ def induce_workflows() -> list[str]:
     all_responses = []
     if "openai" in args.model:
         response = litellm.completion(
-            api_key=os.environ.get("LITELLM_API_KEY"),
-            base_url=os.environ.get("LITELLM_BASE_URL", "https://cmu.litellm.ai"),
+            # api_key=os.environ.get("LITELLM_API_KEY"),
+            # base_url=os.environ.get("LITELLM_BASE_URL", "https://cmu.litellm.ai"),
             model=args.model,
             messages=messages,
             temperature=args.temperature,
@@ -119,8 +119,8 @@ def update_workflows(workflow: str, existing_workflows: list[str]) -> tuple[bool
             {"role": "user", "content": f"Workflow 1: {name}\nWorkflow 2: {ew_name}"}
         ]
         response = litellm.completion(
-            api_key=os.environ.get("LITELLM_API_KEY"),
-            base_url=os.environ.get("LITELLM_BASE_URL", "https://cmu.litellm.ai"),
+            # api_key=os.environ.get("LITELLM_API_KEY"),
+            # base_url=os.environ.get("LITELLM_BASE_URL", "https://cmu.litellm.ai"),
             model=args.model,
             messages=messages,
             temperature=args.temperature,

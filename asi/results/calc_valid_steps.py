@@ -76,9 +76,7 @@ def simplify_thought(step: str) -> str:
             {"role": "user", "content": '\n'.join(text_parts)},
         ]
         response = litellm.completion(
-            api_key=os.environ.get("LITELLM_API_KEY"),
-            base_url="https://cmu.litellm.ai",
-            model=args.model.replace("litellm", "openai"),
+            model=args.model,
             messages=messages,
             temperature=0.0,
         )

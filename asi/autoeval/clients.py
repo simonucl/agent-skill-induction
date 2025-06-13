@@ -7,7 +7,10 @@ from typing import Union, Optional
 from openai import OpenAI, ChatCompletion
 openai.api_key = os.environ["OPENAI_API_KEY"]
 openai.organization = os.environ.get("OPENAI_ORGANIZATION", "")
-client = OpenAI()
+client = OpenAI(
+    base_url="https://openrouter.ai/api/v1",
+    api_key=os.environ.get("OPENROUTER_API_KEY"),
+)
 
 
 class LM_Client:
@@ -79,4 +82,5 @@ CLIENT_DICT = {
     "gpt-4": LM_Client,
     "gpt-4o": GPT4V_Client,
     "gpt-4o-2024-05-13": GPT4V_Client,
+    "anthropic/claude-sonnet-4-20250514": LM_Client,
 }

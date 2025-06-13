@@ -73,7 +73,7 @@ python -m results.calc_valid_step --clean_and_store --result_id results/webarena
 To induce workflow actions for a template group, run:
 
 ```bash
-python induce_actions.py --result_id_list 21 --website "shopping"
+python induce/induce_actions.py --result_id_list 21 --website "shopping"
 ```
 
 This would generate workflow actions and write to `awa_actions/map.py` (by default), generate test cases and write to `debug_actions/test_{i}.txt`, then write and run the bash script `debug_actions/run_tests.sh` to verify the correctness of the induced actions.

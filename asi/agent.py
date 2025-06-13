@@ -341,9 +341,9 @@ class DemoAgent(Agent):
 
             try:
                 response = litellm.completion(
-                    api_key=os.environ.get("LITELLM_API_KEY"),
-                    base_url=os.environ.get("LITELLM_BASE_URL", "https://cmu.litellm.ai"),
-                    model=self.model_name.replace("litellm", "openai"),
+                    # api_key=os.environ.get("LITELLM_API_KEY"),
+                    # base_url=os.environ.get("LITELLM_BASE_URL", "https://cmu.litellm.ai"),
+                    model=self.model_name,
                     messages=[
                         {"role": "system", "content": system_msgs},
                         {"role": "user", "content": user_msgs},

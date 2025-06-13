@@ -150,3 +150,6 @@ results/webarena.*
 
 # assistantbench
 tests/assistantbench/assistantbench-predictions-test.jsonl
+asi/config_files/
+asi/results/
+asi/induce/

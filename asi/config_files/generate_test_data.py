@@ -5,12 +5,12 @@ import os
 import json
 
 BASE_URL = os.environ.get("BASE_URL")
-SHOPPING = f"{BASE_URL}:7770"
-SHOPPING_ADMIN = f"{BASE_URL}:7780/admin"
-REDDIT = f"{BASE_URL}:9999"
-GITLAB = f"{BASE_URL}:8023"
-MAP = f"{BASE_URL}:3000"
-WIKIPEDIA = f"{BASE_URL}:8888/wikipedia_en_all_maxi_2022-05/A/User:The_other_Kiwix_guy/Landing"
+SHOPPING = os.environ.get("WA_SHOPPING")
+SHOPPING_ADMIN = os.environ.get("WA_SHOPPING_ADMIN")
+REDDIT = os.environ.get("WA_REDDIT")
+GITLAB = os.environ.get("WA_GITLAB")
+MAP = os.environ.get("WA_MAP")
+WIKIPEDIA = os.environ.get("WA_WIKIPEDIA")
 
 
 def main() -> None:

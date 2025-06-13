@@ -23,6 +23,7 @@ def run_vanilla():
             "python", "run_demo.py",
             "--task_name", f"webarena.{tid}",
             "--headless",
+            "--model_name", args.model,
         ])
         try:
             stdout, stderr = process.communicate(timeout=200)
@@ -45,6 +46,7 @@ def run_awm():
             "--task_name", f"webarena.{tid}",
             "--memory_path", f"workflows/{args.website}.txt",
             "--headless",
+            "--model_name", args.model,
         ])
         process.wait()
         # input("[1] Completed task solving")
@@ -56,7 +58,10 @@ def run_awm():
         ])
         process.wait()
         path = f"results/webarena.{tid}/gpt-4o-2024-05-13_autoeval.json"
-        is_correct = json.load(open(path))[0]["rm"]  # bool
+        if os.path.exists(path):
+            is_correct = json.load(open(path))[0]["rm"]  # bool
+        else:
+            is_correct = False
         if not is_correct: continue
         # input("[2] Completed evaluated trajectory (true)")
 
@@ -64,6 +69,7 @@ def run_awm():
         process = Popen([
             "python", "-m", "results.calc_valid_steps",
             "--clean_and_store", "--result_dir", f"results/webarena.{tid}",
+            "--model", f"{args.model}",
         ])
         process.wait()  # output 'clean_steps.json'
         # input("[3.1] Completed clean trajectory")
@@ -77,7 +83,7 @@ def run_awm():
         # input("[3.2] Completed induced workflow")
 
         # intermediate supervision
-        cont = input("Continue? (y/n)")
+        # cont = input("Continue? (y/n)")
 
 # %% ASI
 def run_asi():
@@ -88,7 +94,8 @@ def run_asi():
             "python", "run_demo.py",
             "--task_name", f"webarena.{tid}",
             "--websites", args.website,
-            "--headless"
+            "--headless",
+            "--model_name", args.model,
         ])
         try:
             stdout, stderr = process.communicate(timeout=300)
@@ -108,6 +115,7 @@ def run_asi():
         process = Popen([
             "python", "-m", "autoeval.evaluate_trajectory",
             "--result_dir", f"results/webarena.{tid}",
+            "--model", "gpt-4o"
         ])
         process.wait()
         path = f"results/webarena.{tid}/gpt-4o-2024-05-13_autoeval.json"
@@ -117,6 +125,7 @@ def run_asi():
         process = Popen([
             "python", "-m", "results.calc_valid_steps",
             "--clean_and_store", "--result_dir", f"results/webarena.{tid}",
+            "--model", f"{args.model}",
         ])
         process.wait()  # output 'clean_steps.json'
         # input("[2.2] Completed clean trajectory")
@@ -126,6 +135,7 @@ def run_asi():
             "python", "-m", "induce.induce_actions",
             "--website", args.website,
             "--result_id_list", tid,
+            "--model", f"{args.model}",
         ])
         try:
             stdout, stderr = process.communicate(timeout=200)
@@ -307,7 +317,9 @@ if __name__ == "__main__":
                         choices=["shopping", "admin", "reddit", "gitlab", "map"])
     parser.add_argument("--task_ids", type=str, required=True,
                         help="xxx-xxx,xxx-xxx")
-
+    parser.add_argument("--model", type=str, default="anthropic/claude-sonnet-4-20250514",
+                        choices=["openai/gpt-4o", "anthropic/claude-sonnet-4-20250514"])
+    
     args = parser.parse_args()
 
     if args.experiment == "vanilla":

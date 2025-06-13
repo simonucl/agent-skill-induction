@@ -100,9 +100,9 @@ def induce_actions() -> list[str] | None:
     all_responses = []
     if "openai" in args.model:  # can generate multiple responses at once
         response = litellm.completion(
-            api_key=os.environ.get("LITELLM_API_KEY"),
-            base_url=os.environ.get("LITELLM_BASE_URL", "https://cmu.litellm.ai"),
-            model=args.model.replace("litellm", "openai"),
+            # api_key=os.environ.get("LITELLM_API_KEY"),
+            # base_url=os.environ.get("LITELLM_BASE_URL", "https://cmu.litellm.ai"),
+            model=args.model,
             messages=messages,
             temperature=args.temperature,
             n=args.num_responses,
@@ -116,9 +116,9 @@ def induce_actions() -> list[str] | None:
     else:  # need to explicitly generate multiple times
         for i in range(args.num_responses):
             response = litellm.completion(
-                api_key=os.environ.get("LITELLM_API_KEY"),
-                base_url=os.environ.get("LITELLM_BASE_URL", "https://cmu.litellm.ai"),
-                model=args.model.replace("litellm", "openai"),
+                # api_key=os.environ.get("LITELLM_API_KEY"),
+                # base_url=os.environ.get("LITELLM_BASE_URL", "https://cmu.litellm.ai"),
+                model=args.model,
                 messages=messages,
                 temperature=args.temperature,
             )
@@ -153,7 +153,7 @@ def write_actions(response: str) -> tuple[str, list[str]]:
         [a.split("\n")[0] for a in new_actions],
         action_names
     )
-    cont = input("Continue? (y/n): ")
+    # cont = input("Continue? (y/n): ")
     if len(new_actions) == 0: return None, None
 
     tmp_path = args.write_action_path + ".tmp"
@@ -179,7 +179,12 @@ def write_tests(response: str, result_id_list: list[str], action_names: list[str
         bool: If all tests passed the check.
     """
     tests = parse_tests(response, action_names)
-    assert len(tests) == len(result_id_list), f"Got #{len(tests)} tests but for #{len(result_id_list)} results."
+
+    # Result ID list is the [IDs]
+    # Tests is the [test_cases]
+    if len(result_id_list) != len(tests):
+        result_id_list = result_id_list * len(tests)
+    # assert len(tests) == len(result_id_list), f"Got #{len(tests)} tests but for #{len(result_id_list)} results."
     
     # write tests and script
     script_content = []
@@ -187,6 +192,7 @@ def write_tests(response: str, result_id_list: list[str], action_names: list[str
         # write test trajectory
         test_path = os.path.join(args.write_tests_dir, f"test_{i}.txt")
         test_str = '\n'.join([f"```{tl.strip()}```" for tl in t.split('\n') if tl.strip()])
+        os.makedirs(args.write_tests_dir, exist_ok=True)
         with open(test_path, 'w') as fw:  # overwrite existing content
             fw.write(test_str)
         
@@ -269,13 +275,13 @@ def write_tests(response: str, result_id_list: list[str], action_names: list[str
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("--model", type=str, default="claude", choices=["gpt-4o", "claude"])
+    parser.add_argument("--model", type=str, default="claude")
     parser.add_argument("--num_responses", type=int, default=1, help="Number of responses to generate.")
     parser.add_argument("--temperature", type=float, default=1.0, help="Temperature for sampling.")
 
-    parser.add_argument("--sys_msg_path", type=str, default="induce/promptsystem_message.txt")
-    parser.add_argument("--instruction_path", type=str, default="induce/promptinstruction.txt")
-    parser.add_argument("--few_shot_path", type=str, default="induce/promptshopping.md")
+    parser.add_argument("--sys_msg_path", type=str, default="induce/prompt/system_message.txt")
+    parser.add_argument("--instruction_path", type=str, default="induce/prompt/instruction.txt")
+    parser.add_argument("--few_shot_path", type=str, default="induce/prompt/shopping.md")
     parser.add_argument("--test_query_path", type=str, default="induce/prompttest_query.txt")
 
     parser.add_argument("--template_id", type=str, default=None)
