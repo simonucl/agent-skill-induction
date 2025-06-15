@@ -59,8 +59,8 @@ class DemoAgent(Agent):
         use_html: bool,
         use_axtree: bool,
         use_screenshot: bool,
-        websites: tuple[str],
-        actions: list[str],
+        websites: list[str],
+        actions: tuple[str],
         memory: str,
     ) -> None:
         super().__init__()
@@ -74,7 +74,10 @@ class DemoAgent(Agent):
             raise ValueError(f"Either use_html or use_axtree must be set to True.")
 
         custom_actions = ACTION_DICT["general"] + ACTION_DICT["webarena"]
-        
+        if websites:
+            for website in websites:
+                custom_actions += ACTION_DICT[website]
+        print(f"Custom actions: {custom_actions}")
 
         self.action_set = CustomActionSet(
             subsets=["custom"],
@@ -397,8 +400,8 @@ class DemoAgentArgs(AbstractAgentArgs):
     use_html: bool = False
     use_axtree: bool = True
     use_screenshot: bool = False
-    websites: tuple[str] = ()
-    actions: list[str] = ()
+    websites: list[str] = dataclasses.field(default_factory=list)
+    actions: tuple[str] = ()
     memory: str = None
 
     def make_agent(self):

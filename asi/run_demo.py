@@ -80,6 +80,7 @@ def parse_args():
     parser.add_argument(
         "--action_path", type=str, default=None, # "debug_actions/test.txt",
         help="Path to the specified actions for agents to take.",
+        # This forces the agent to use the specified actions in specified order
     )
     parser.add_argument(
         "--memory_path", type=str, default=None, # "memory/test.txt",
@@ -104,6 +105,10 @@ https://github.com/ServiceNow/AgentLab"""
     )
 
     args = parse_args()
+    print("Arguments:")
+    for arg, value in vars(args).items():
+        print(f"  {arg}: {value}")
+
     if args.rename_to is None:
         args.rename_to = args.task_name
 
@@ -115,6 +120,8 @@ https://github.com/ServiceNow/AgentLab"""
             actions = []
     else:
         actions = []
+    
+    print(f"Using actions: {actions}")
     # setting up agent config
     agent_args = DemoAgentArgs(
         model_name=args.model_name,

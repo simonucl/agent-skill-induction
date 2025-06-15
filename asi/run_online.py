@@ -330,14 +330,38 @@ def run_mem_asi():
         # intermediate supervision
         cont = input("Continue? (y/n)")
 
+# %% Action only demo
 
+def run_asi_vanilla():
+    task_id_list = parse_task_ids(args.task_ids)
+    print(f"Total task ids: {len(task_id_list)}")
+    task_id_list = filter_by_website(task_id_list, args.websites)
+    print(f"Filtered task ids: {len(task_id_list)}")
+    
+    for tid in task_id_list:
+        process = Popen([
+            "python", "run_demo.py",
+            "--task_name", f"webarena.{tid}",
+            "--websites", args.websites,
+            "--headless",
+            "--model_name", args.model,
+        ])
+        try:
+            stdout, stderr = process.communicate(timeout=300)
+            print("Process completed successfully:")
+            print(stdout)
+        except subprocess.TimeoutExpired as e:
+            process.kill()
+            stdout, stderr = process.communicate() # Clean up resources
+            print(f"Process timed out after {e.timeout} seconds.")
+            continue
 # %% Main Pipeline
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--experiment", type=str, required=True,
-                        choices=["vanilla", "awm", "asi", "mem_asi", "veri_program", "veri_text"])
-    parser.add_argument("--website", type=str, required=True,
+                        choices=["vanilla", "awm", "asi", "mem_asi", "veri_program", "veri_text", "asi_vanilla"])
+    parser.add_argument("--websites", type=str, required=True,
                         choices=["shopping", "admin", "reddit", "gitlab", "map"])
     parser.add_argument("--task_ids", type=str, required=True,
                         help="xxx-xxx,xxx-xxx")
@@ -353,3 +377,5 @@ if __name__ == "__main__":
         run_asi()
     elif args.experiment == "mem_asi":
         run_mem_asi()
+    elif args.experiment == "asi_vanilla":
+        run_asi_vanilla()

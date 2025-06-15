@@ -95,7 +95,7 @@ def induce_actions() -> list[str] | None:
     messages = [{"role": "system", "content": open(args.sys_msg_path).read()}]
     messages += [{"role": "user", "content": open(args.instruction_path).read()}]
     messages += [{"role": "user", "content": open(args.few_shot_path).read()}]
-    messages += [{"role": "user", "content": "## Existing Actions\n" + open(args.write_action_path).read()}]
+    # messages += [{"role": "user", "content": "## Existing Actions\n" + open(args.write_action_path).read()}]
     messages += [{"role": "user", "content": test_query + '\n\n## Reusable Functions'}]
 
     all_responses = []
@@ -193,7 +193,7 @@ def write_tests(response: str, result_id_list: list[str], action_names: list[str
     # Tests is the [test_cases]
     if len(result_id_list) != len(tests):
         result_id_list = result_id_list * len(tests)
-    # assert len(tests) == len(result_id_list), f"Got #{len(tests)} tests but for #{len(result_id_list)} results."
+    assert len(tests) == len(result_id_list), f"Got #{len(tests)} tests but for #{len(result_id_list)} results."
     
     # write tests and script
     script_content = []
