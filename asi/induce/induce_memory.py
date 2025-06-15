@@ -3,6 +3,7 @@ import json
 import litellm
 import argparse
 from induce.utils import get_output_dir, get_task_id
+from openai import OpenAI
 
 # %% Induce Memory
 
@@ -64,7 +65,11 @@ def induce_workflows() -> list[str]:
 
     all_responses = []
     if "openai" in args.model:
-        response = litellm.completion(
+        client = OpenAI(
+            base_url="https://openrouter.ai/api/v1",
+            api_key=os.environ.get("OPENROUTER_API_KEY"),
+        )
+        response = client.chat.completions.create(
             # api_key=os.environ.get("LITELLM_API_KEY"),
             # base_url=os.environ.get("LITELLM_BASE_URL", "https://cmu.litellm.ai"),
             model=args.model,
@@ -80,9 +85,11 @@ def induce_workflows() -> list[str]:
             all_responses.append(curr_resp)
     else:
         for i in range(args.num_responses):
-            response = litellm.completion(
-                api_key=os.environ.get("LITELLM_API_KEY"),
-                base_url=os.environ.get("LITELLM_BASE_URL", "https://cmu.litellm.ai"),
+            client = OpenAI(
+                base_url="https://openrouter.ai/api/v1",
+                api_key=os.environ.get("OPENROUTER_API_KEY"),
+            )
+            response = client.chat.completions.create(
                 model=args.model,
                 messages=messages,
                 temperature=args.temperature,
@@ -118,7 +125,11 @@ def update_workflows(workflow: str, existing_workflows: list[str]) -> tuple[bool
             {"role": "user", "content": "Does the following two workflows refer to the same task? Only return 'yes' or 'no', do not provide any additional information."},
             {"role": "user", "content": f"Workflow 1: {name}\nWorkflow 2: {ew_name}"}
         ]
-        response = litellm.completion(
+        client = OpenAI(
+            base_url="https://openrouter.ai/api/v1",
+            api_key=os.environ.get("OPENROUTER_API_KEY"),
+        )
+        response = client.chat.completions.create(
             # api_key=os.environ.get("LITELLM_API_KEY"),
             # base_url=os.environ.get("LITELLM_BASE_URL", "https://cmu.litellm.ai"),
             model=args.model,
@@ -152,9 +163,11 @@ def get_better_workflow(workflow1: str, workflow2: str) -> str:
         {"role": "user", "content": "Which workflow is more helpful in guiding web navigation? Only return 'Workflow 1' or 'Workflow 2', do not provide any additional information."},
         {"role": "user", "content": f"Workflow 1:\n{workflow1}\nWorkflow 2:\n{workflow2}"}
     ]
-    response = litellm.completion(
-        api_key=os.environ.get("LITELLM_API_KEY"),
-        base_url=os.environ.get("LITELLM_BASE_URL", "https://cmu.litellm.ai"),
+    client = OpenAI(
+        base_url="https://openrouter.ai/api/v1",
+        api_key=os.environ.get("OPENROUTER_API_KEY"),
+    )
+    response = client.chat.completions.create(
         model=args.model,
         messages=messages,
         temperature=args.temperature,

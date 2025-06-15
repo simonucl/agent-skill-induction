@@ -12,6 +12,22 @@ def parse_task_ids(task_id_str: str) -> list[str]:
         task_id_list.extend([str(i) for i in range(s, e+1)])
     return task_id_list
 
+def filter_by_website(task_id_list: list[str], website: str) -> list[str]:
+    filtered_task_id_list = []
+    for tid in task_id_list:
+        config_path = f"config_files/{tid}.json"
+        if not os.path.exists(config_path):
+            print(f"Config file {config_path} does not exist.")
+            continue
+        else:
+            config = json.load(open(config_path, 'r'))
+            if config["sites"] != [website]:
+                print(f"Config file {config_path} does not match the website {website}.")
+                continue
+            else:
+                filtered_task_id_list.append(tid)
+    return filtered_task_id_list
+
 # %% Baseline
 
 def run_vanilla():
@@ -88,6 +104,10 @@ def run_awm():
 # %% ASI
 def run_asi():
     task_id_list = parse_task_ids(args.task_ids)
+    print(f"Total task ids: {len(task_id_list)}")
+    task_id_list = filter_by_website(task_id_list, args.website)
+    print(f"Filtered task ids: {len(task_id_list)}")
+    
     for tid in task_id_list:
         # step 1: task solving
         process = Popen([
@@ -115,10 +135,11 @@ def run_asi():
         process = Popen([
             "python", "-m", "autoeval.evaluate_trajectory",
             "--result_dir", f"results/webarena.{tid}",
-            "--model", "gpt-4o"
+            "--model", f"{args.model}",
         ])
+        model_name = args.model.replace("/", "_")
         process.wait()
-        path = f"results/webarena.{tid}/gpt-4o-2024-05-13_autoeval.json"
+        path = f"results/webarena.{tid}/{model_name}_autoeval.json"
         is_correct = json.load(open(path))[0]["rm"]  # bool
         if not is_correct: continue
         # input("[2.1] Completed evaluated trajectory (true)")
@@ -188,6 +209,7 @@ def run_veri_program():
         process = Popen([
             "python", "-m", "results.calc_valid_steps",
             "--clean_and_store", "--result_dir", f"results/webarena.{tid}",
+            "--model", f"{args.model}",
         ])
         process.wait()  # output 'clean_steps.json'
         # input("[2.2] Completed clean trajectory")
@@ -292,6 +314,7 @@ def run_mem_asi():
                 "python", "-m", "results.calc_valid_steps",
                 "--clean_and_store",
                 "--result_dir", f"results/webarena.{task_abbr}",
+                "--model", f"{args.model}",
             ])
             process.wait()  # output 'clean_steps.json'
             # input("[4.1] Completed clean trajectory")
@@ -299,6 +322,7 @@ def run_mem_asi():
             "python", "-m", "induce.induce_memory",
             "--website", args.website,
             "--result_id_list", task_abbr,
+            "--model", f"{args.model}",
         ])
         process.wait()
         input("[4.2] Completed induce memory")
@@ -317,8 +341,7 @@ if __name__ == "__main__":
                         choices=["shopping", "admin", "reddit", "gitlab", "map"])
     parser.add_argument("--task_ids", type=str, required=True,
                         help="xxx-xxx,xxx-xxx")
-    parser.add_argument("--model", type=str, default="anthropic/claude-sonnet-4-20250514",
-                        choices=["openai/gpt-4o", "anthropic/claude-sonnet-4-20250514"])
+    parser.add_argument("--model", type=str, required=True)
     
     args = parser.parse_args()
 

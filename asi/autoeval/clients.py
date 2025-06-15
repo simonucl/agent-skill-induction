@@ -82,5 +82,5 @@ CLIENT_DICT = {
     "gpt-4": LM_Client,
     "gpt-4o": GPT4V_Client,
     "gpt-4o-2024-05-13": GPT4V_Client,
-    "anthropic/claude-sonnet-4-20250514": LM_Client,
+    "anthropic/claude-sonnet-4": GPT4V_Client,
 }

@@ -11,6 +11,8 @@ import json
 import pickle
 import litellm
 import argparse
+from openai import OpenAI
+
 
 def is_valid_step(step_info) -> bool:
     """Check if the step is valid and no errors."""
@@ -75,7 +77,11 @@ def simplify_thought(step: str) -> str:
             {"role": "system", "content": SIMPLIFY_THOUGHT_INSTRUCTION},
             {"role": "user", "content": '\n'.join(text_parts)},
         ]
-        response = litellm.completion(
+        client = OpenAI(
+            base_url="https://openrouter.ai/api/v1",
+            api_key=os.environ.get("OPENROUTER_API_KEY"),
+        )
+        response = client.chat.completions.create(
             model=args.model,
             messages=messages,
             temperature=0.0,

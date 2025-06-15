@@ -12,35 +12,40 @@ export WA_WIKIPEDIA="https://sa-wikipedia-${SUFFIX}.${DOMAIN_NAME}/wikipedia_en_
 export WA_MAP="https://sa-map-${SUFFIX}.${DOMAIN_NAME}"
 
 export PYTHONPATH="$PYTHONPATH:$(pwd)"
-MODEL=anthropic/claude-sonnet-4-20250514
+MODEL=anthropic/claude-sonnet-4
+MODEL=openai/gpt-4o
 TASK_ID=22
-RERUN=true
+RERUN=false
 rm -rf outputs/*
 python3 config_files/generate_test_data.py
 
-# python run_online.py --experiment "asi" --website "shopping" --task_ids "21-25"
-
- if [ "$RERUN" = true ]; then
-    rm -rf results/webarena.*
-    # Clean outputs directory if it exists
-    python run_demo.py \
-        --task_name "webarena.${TASK_ID}" \
-        --websites "shopping" \
-        --model_name ${MODEL} \
-        --headless
-fi
-
-python autoeval/evaluate_trajectory.py \
-    --result_dir "results/webarena.${TASK_ID}" \
-    --model ${MODEL}
-
-
-python -m results.calc_valid_steps \
-    --clean_and_store \
-    --result_dir results/webarena.${TASK_ID} \
-    --model ${MODEL}
-
-python induce/induce_actions.py \
-    --result_id_list ${TASK_ID} \
+python run_online.py \
+    --experiment "asi" \
     --website "shopping" \
+    --task_ids "0-800" \
     --model ${MODEL}
+
+#  if [ "$RERUN" = true ]; then
+#     rm -rf results/webarena.*
+#     # Clean outputs directory if it exists
+#     python run_demo.py \
+#         --task_name "webarena.${TASK_ID}" \
+#         --websites "shopping" \
+#         --model_name ${MODEL} \
+#         --headless
+# fi
+
+# python autoeval/evaluate_trajectory.py \
+#     --result_dir "results/webarena.${TASK_ID}" \
+#     --model ${MODEL}
+
+
+# python -m results.calc_valid_steps \
+#     --clean_and_store \
+#     --result_dir results/webarena.${TASK_ID} \
+#     --model ${MODEL}
+
+# python induce/induce_actions.py \
+#     --result_id_list ${TASK_ID} \
+#     --website "shopping" \
+#     --model ${MODEL}

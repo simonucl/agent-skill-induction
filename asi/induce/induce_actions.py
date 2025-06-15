@@ -11,6 +11,7 @@ from induce.utils import (
     extract_code_pieces, get_task_id, get_result_dirs,
     get_output_dir
 )
+from openai import OpenAI
 
 # %% Induce Actions
 
@@ -94,12 +95,16 @@ def induce_actions() -> list[str] | None:
     messages = [{"role": "system", "content": open(args.sys_msg_path).read()}]
     messages += [{"role": "user", "content": open(args.instruction_path).read()}]
     messages += [{"role": "user", "content": open(args.few_shot_path).read()}]
-    # messages += [{"role": "user", "content": "## Existing Actions\n" + open(args.write_action_path).read()}]
+    messages += [{"role": "user", "content": "## Existing Actions\n" + open(args.write_action_path).read()}]
     messages += [{"role": "user", "content": test_query + '\n\n## Reusable Functions'}]
 
     all_responses = []
     if "openai" in args.model:  # can generate multiple responses at once
-        response = litellm.completion(
+        client = OpenAI(
+            base_url="https://openrouter.ai/api/v1",
+            api_key=os.environ.get("OPENROUTER_API_KEY"),
+        )
+        response = client.chat.completions.create(
             # api_key=os.environ.get("LITELLM_API_KEY"),
             # base_url=os.environ.get("LITELLM_BASE_URL", "https://cmu.litellm.ai"),
             model=args.model,
@@ -115,7 +120,11 @@ def induce_actions() -> list[str] | None:
             all_responses.append(curr_resp)
     else:  # need to explicitly generate multiple times
         for i in range(args.num_responses):
-            response = litellm.completion(
+            client = OpenAI(
+                base_url="https://openrouter.ai/api/v1",
+                api_key=os.environ.get("OPENROUTER_API_KEY"),
+            )
+            response = client.chat.completions.create(
                 # api_key=os.environ.get("LITELLM_API_KEY"),
                 # base_url=os.environ.get("LITELLM_BASE_URL", "https://cmu.litellm.ai"),
                 model=args.model,

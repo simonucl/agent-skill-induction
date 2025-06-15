@@ -1,5 +1,6 @@
 import os
 import argparse
+import shutil
 
 # locally defined agent
 from agent import DemoAgentArgs
@@ -162,6 +163,8 @@ https://github.com/ServiceNow/AgentLab"""
         print(f"{key}: {val}")
     
     if args.rename_to is not None:
+        if os.path.exists(f"results/{args.rename_to}"):
+            shutil.rmtree(f"results/{args.rename_to}")
         os.rename(exp_args.exp_dir, f"results/{args.rename_to}")
 
 

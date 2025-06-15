@@ -4,6 +4,7 @@ import io
 import os
 import litellm
 import logging
+from openai import OpenAI
 
 import numpy as np
 from PIL import Image
@@ -340,9 +341,21 @@ class DemoAgent(Agent):
                         )
 
             try:
-                response = litellm.completion(
-                    # api_key=os.environ.get("LITELLM_API_KEY"),
-                    # base_url=os.environ.get("LITELLM_BASE_URL", "https://cmu.litellm.ai"),
+                # response = litellm.completion(
+                #     # api_key=os.environ.get("LITELLM_API_KEY"),
+                #     # base_url=os.environ.get("LITELLM_BASE_URL", "https://cmu.litellm.ai"),
+                #     model=self.model_name,
+                #     messages=[
+                #         {"role": "system", "content": system_msgs},
+                #         {"role": "user", "content": user_msgs},
+                #     ],
+                #     temperature=0.0,
+                # )
+                client = OpenAI(
+                    base_url="https://openrouter.ai/api/v1",
+                    api_key=os.environ.get("OPENROUTER_API_KEY"),
+                )
+                response = client.chat.completions.create(
                     model=self.model_name,
                     messages=[
                         {"role": "system", "content": system_msgs},
@@ -352,7 +365,8 @@ class DemoAgent(Agent):
                 )
                 action = response.choices[0].message.content
                 action = action.replace('```python', '```')
-            except:
+            except Exception as e:
+                print(f"Error: {e}")
                 action = ""
         else:
             if self.num_actions > (len(self.actions) - 1):
