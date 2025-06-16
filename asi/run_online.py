@@ -105,7 +105,7 @@ def run_awm():
 def run_asi():
     task_id_list = parse_task_ids(args.task_ids)
     print(f"Total task ids: {len(task_id_list)}")
-    task_id_list = filter_by_website(task_id_list, args.website)
+    task_id_list = filter_by_website(task_id_list, args.websites)
     print(f"Filtered task ids: {len(task_id_list)}")
     
     for tid in task_id_list:
@@ -113,7 +113,7 @@ def run_asi():
         process = Popen([
             "python", "run_demo.py",
             "--task_name", f"webarena.{tid}",
-            "--websites", args.website,
+            "--websites", args.websites,
             "--headless",
             "--model_name", args.model,
         ])
@@ -154,7 +154,7 @@ def run_asi():
         # step 3: induce actions
         process = Popen([
             "python", "-m", "induce.induce_actions",
-            "--website", args.website,
+            "--website", args.websites,
             "--result_id_list", tid,
             "--model", f"{args.model}",
         ])

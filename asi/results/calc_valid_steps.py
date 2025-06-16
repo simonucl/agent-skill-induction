@@ -78,8 +78,8 @@ def simplify_thought(step: str) -> str:
             {"role": "user", "content": '\n'.join(text_parts)},
         ]
         client = OpenAI(
-            base_url="https://openrouter.ai/api/v1",
-            api_key=os.environ.get("OPENROUTER_API_KEY"),
+            base_url=os.environ.get("OPENAI_BASE_URL"),
+            api_key=os.environ.get("OPENAI_API_KEY"),
         )
         response = client.chat.completions.create(
             model=args.model,

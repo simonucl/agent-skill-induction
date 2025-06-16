@@ -19,7 +19,7 @@ from browsergym.core.action.functions import (
 
 # %% Import Induced Actions
 
-from actions import shopping, admin, reddit, map, gitlab
+from actions import admin, reddit, map, gitlab, shopping
 
 def get_functions(module, prefix='actions.') -> list:
     functions = []

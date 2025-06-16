@@ -66,8 +66,8 @@ def induce_workflows() -> list[str]:
     all_responses = []
     if "openai" in args.model:
         client = OpenAI(
-            base_url="https://openrouter.ai/api/v1",
-            api_key=os.environ.get("OPENROUTER_API_KEY"),
+            base_url=os.environ.get("OPENAI_BASE_URL"),
+            api_key=os.environ.get("OPENAI_API_KEY"),
         )
         response = client.chat.completions.create(
             # api_key=os.environ.get("LITELLM_API_KEY"),
@@ -86,8 +86,8 @@ def induce_workflows() -> list[str]:
     else:
         for i in range(args.num_responses):
             client = OpenAI(
-                base_url="https://openrouter.ai/api/v1",
-                api_key=os.environ.get("OPENROUTER_API_KEY"),
+                base_url=os.environ.get("OPENAI_BASE_URL"),
+                api_key=os.environ.get("OPENAI_API_KEY"),
             )
             response = client.chat.completions.create(
                 model=args.model,
@@ -126,8 +126,8 @@ def update_workflows(workflow: str, existing_workflows: list[str]) -> tuple[bool
             {"role": "user", "content": f"Workflow 1: {name}\nWorkflow 2: {ew_name}"}
         ]
         client = OpenAI(
-            base_url="https://openrouter.ai/api/v1",
-            api_key=os.environ.get("OPENROUTER_API_KEY"),
+            base_url=os.environ.get("OPENAI_BASE_URL"),
+            api_key=os.environ.get("OPENAI_API_KEY"),
         )
         response = client.chat.completions.create(
             # api_key=os.environ.get("LITELLM_API_KEY"),
@@ -164,8 +164,8 @@ def get_better_workflow(workflow1: str, workflow2: str) -> str:
         {"role": "user", "content": f"Workflow 1:\n{workflow1}\nWorkflow 2:\n{workflow2}"}
     ]
     client = OpenAI(
-        base_url="https://openrouter.ai/api/v1",
-        api_key=os.environ.get("OPENROUTER_API_KEY"),
+        base_url=os.environ.get("OPENAI_BASE_URL"),
+        api_key=os.environ.get("OPENAI_API_KEY"),
     )
     response = client.chat.completions.create(
         model=args.model,

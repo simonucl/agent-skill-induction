@@ -101,8 +101,8 @@ def induce_actions() -> list[str] | None:
     all_responses = []
     if "openai" in args.model:  # can generate multiple responses at once
         client = OpenAI(
-            base_url="https://openrouter.ai/api/v1",
-            api_key=os.environ.get("OPENROUTER_API_KEY"),
+            base_url=os.environ.get("OPENAI_BASE_URL"),
+            api_key=os.environ.get("OPENAI_API_KEY"),
         )
         response = client.chat.completions.create(
             # api_key=os.environ.get("LITELLM_API_KEY"),
@@ -121,8 +121,8 @@ def induce_actions() -> list[str] | None:
     else:  # need to explicitly generate multiple times
         for i in range(args.num_responses):
             client = OpenAI(
-                base_url="https://openrouter.ai/api/v1",
-                api_key=os.environ.get("OPENROUTER_API_KEY"),
+                base_url=os.environ.get("OPENAI_BASE_URL"),
+                api_key=os.environ.get("OPENAI_API_KEY"),
             )
             response = client.chat.completions.create(
                 # api_key=os.environ.get("LITELLM_API_KEY"),
@@ -211,7 +211,8 @@ def write_tests(response: str, result_id_list: list[str], action_names: list[str
             f"python run_demo.py --websites {args.website} --headless "
             f"--task_name webarena.{r.split('_')[0]} "
             f"--action_path {test_path} "
-            f"--rename_to webarena.{r.split('_')[0]}_test",
+            f"--rename_to webarena.{r.split('_')[0]}_test "
+            f"--model_name {args.model}"
         )
         script_content.append("\n")
     
@@ -248,7 +249,8 @@ def write_tests(response: str, result_id_list: list[str], action_names: list[str
         else:
             process = subprocess.Popen([
                 "python", "-m", "autoeval.evaluate_trajectory",
-                "--result_dir", os.path.join(args.results_dir, f"webarena.{r}_test")
+                "--result_dir", os.path.join(args.results_dir, f"webarena.{r}_test"),
+                "--model", args.model
             ])
             process.wait()
 
@@ -344,6 +346,7 @@ if __name__ == "__main__":
                 process.wait()
                 # cont = input("Continue? (y/n): ")
         else:
+            print(f"Successfully induced actions, writing action {action_names} to {args.write_action_path}")
             process = subprocess.Popen(["rm", tmp_path])
             process.wait()
             break
