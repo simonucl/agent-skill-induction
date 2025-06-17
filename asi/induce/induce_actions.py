@@ -12,6 +12,7 @@ from induce.utils import (
     get_output_dir
 )
 from openai import OpenAI
+import shutil
 
 # %% Induce Actions
 
@@ -189,6 +190,8 @@ def write_tests(response: str, result_id_list: list[str], action_names: list[str
     """
     tests = parse_tests(response, action_names)
 
+    print(f"Tests: {tests}")
+    # input("Continue?")
     # Result ID list is the [IDs]
     # Tests is the [test_cases]
     if len(result_id_list) != len(tests):
@@ -197,11 +200,13 @@ def write_tests(response: str, result_id_list: list[str], action_names: list[str
     
     # write tests and script
     script_content = []
+    if os.path.exists(args.write_tests_dir):
+        shutil.rmtree(args.write_tests_dir) # remove existing tests
+    os.makedirs(args.write_tests_dir, exist_ok=True)
     for i, (t, r) in enumerate(zip(tests, result_id_list)):
         # write test trajectory
         test_path = os.path.join(args.write_tests_dir, f"test_{i}.txt")
         test_str = '\n'.join([f"```{tl.strip()}```" for tl in t.split('\n') if tl.strip()])
-        os.makedirs(args.write_tests_dir, exist_ok=True)
         with open(test_path, 'w') as fw:  # overwrite existing content
             fw.write(test_str)
         
