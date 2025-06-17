@@ -228,7 +228,7 @@ def write_tests(response: str, result_id_list: list[str], action_names: list[str
     # run all tests
     process = subprocess.Popen(["bash", test_script_path])
     try:
-        stdout, stderr = process.communicate(timeout=100)
+        stdout, stderr = process.communicate(timeout=1000)
         print(stdout)
     except subprocess.TimeoutExpired as e:
         process.kill()
@@ -245,27 +245,31 @@ def write_tests(response: str, result_id_list: list[str], action_names: list[str
     # check test results
     scores = []
     for r in result_id_list:
-        if args.eval_with_gold:
-            eval_path = os.path.join(args.results_dir, f"webarena.{r}_test", "summary_info.json")
-            if os.path.exists(eval_path):
-                scores.append(json.load(open(eval_path))["cum_reward"] == 1.0)
-            else:
-                scores.append(False)
+        gold_score = False
+        # if args.eval_with_gold:
+        eval_path = os.path.join(args.results_dir, f"webarena.{r}_test", "summary_info.json")
+        if os.path.exists(eval_path):
+            gold_score = json.load(open(eval_path))["cum_reward"] == 1.0
+                
+        if gold_score:
+            scores.append(True)
         else:
+            score = False
             process = subprocess.Popen([
                 "python", "-m", "autoeval.evaluate_trajectory",
                 "--result_dir", os.path.join(args.results_dir, f"webarena.{r}_test"),
                 "--model", args.model
             ])
             process.wait()
-
-            eval_path = os.path.join(args.results_dir, f"webarena.{r}_test", "gpt-4o-2024-05-13_autoeval.json")
-            if os.path.exists(eval_path):
-                scores.append(json.load(open(eval_path))[0]["rm"] == True)
+            
+            model_name = args.model.replace("/", "_")
+            autoeval_path = os.path.join(args.results_dir, f"webarena.{r}_test", f"{model_name}_autoeval.json")
+            if os.path.exists(autoeval_path):
+                scores.append(json.load(open(autoeval_path))[0]["rm"] == True)
+                # scores.append(score)
             else:
+                print(f"Evaluation file {autoeval_path} does not exist.")
                 scores.append(False)
-
-        # check step valid and use actions
         command = [
             "python", "-m", "results.calc_valid_steps",
             "--result_dir", os.path.join(args.results_dir, f"webarena.{r}_test"),

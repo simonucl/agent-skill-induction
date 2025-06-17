@@ -3,13 +3,16 @@ import json
 import argparse
 import subprocess
 from subprocess import Popen
-
+import random
 def parse_task_ids(task_id_str: str) -> list[str]:
+    random.seed(args.seed)
     chunks = [c.strip() for c in task_id_str.split(",")]
     task_id_list = []
     for c in chunks:
         s, e = [int(n.strip()) for n in c.split("-")]
         task_id_list.extend([str(i) for i in range(s, e+1)])
+    random.shuffle(task_id_list)
+    task_id_list = task_id_list[1:]
     return task_id_list
 
 def filter_by_website(task_id_list: list[str], website: str) -> list[str]:
@@ -116,6 +119,7 @@ def run_asi():
             "--websites", args.websites,
             "--headless",
             "--model_name", args.model,
+            "--use_screenshot", "True",
         ])
         try:
             stdout, stderr = process.communicate(timeout=300)
@@ -366,6 +370,7 @@ if __name__ == "__main__":
     parser.add_argument("--task_ids", type=str, required=True,
                         help="xxx-xxx,xxx-xxx")
     parser.add_argument("--model", type=str, required=True)
+    parser.add_argument("--seed", type=int, default=42)
     
     args = parser.parse_args()
 
