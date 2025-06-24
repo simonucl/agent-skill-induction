@@ -4,15 +4,23 @@ import argparse
 import subprocess
 from subprocess import Popen
 import random
+import datetime
+import shutil
+from tqdm import tqdm
+
 def parse_task_ids(task_id_str: str) -> list[str]:
     random.seed(args.seed)
     chunks = [c.strip() for c in task_id_str.split(",")]
     task_id_list = []
     for c in chunks:
-        s, e = [int(n.strip()) for n in c.split("-")]
+        chunk = c.split("-")
+        if len(chunk) == 1:
+            s, e = int(chunk[0]), int(chunk[0])
+        else:
+            s, e = int(chunk[0].strip()), int(chunk[1].strip())
+        # s, e = [int(n.strip()) for n in c.split("-")]
         task_id_list.extend([str(i) for i in range(s, e+1)])
     random.shuffle(task_id_list)
-    task_id_list = task_id_list[1:]
     return task_id_list
 
 def filter_by_website(task_id_list: list[str], website: str) -> list[str]:
@@ -66,6 +74,8 @@ def run_awm():
             "--memory_path", f"workflows/{args.website}.txt",
             "--headless",
             "--model_name", args.model,
+            "--use_screenshot", "True",
+            "--max_steps", "30",
         ])
         process.wait()
         # input("[1] Completed task solving")
@@ -111,7 +121,26 @@ def run_asi():
     task_id_list = filter_by_website(task_id_list, args.websites)
     print(f"Filtered task ids: {len(task_id_list)}")
     
-    for tid in task_id_list:
+    
+    for i, tid in tqdm(enumerate(task_id_list), desc="Processing tasks", total=len(task_id_list)):
+        if (i + 1) % args.save_interval == 0:
+            # Create backup directory if it doesn't exist
+            backup_dir = f"actions/backups"
+            os.makedirs(backup_dir, exist_ok=True)
+            
+            # Create timestamped backup of the actions file
+            timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+            backup_filename = f"{args.websites}_step_{i+1}_{timestamp}.py"
+            backup_path = os.path.join(backup_dir, backup_filename)
+            
+            # Copy the current actions file to backup
+            actions_file = f"actions/{args.websites}.py"
+            if os.path.exists(actions_file):
+                shutil.copy2(actions_file, backup_path)
+                print(f"Saved induced actions backup to {backup_path} after {i+1} processed tasks")
+            else:
+                print(f"Warning: Actions file {actions_file} not found for backup")
+
         # step 1: task solving
         process = Popen([
             "python", "run_demo.py",
@@ -120,6 +149,7 @@ def run_asi():
             "--headless",
             "--model_name", args.model,
             "--use_screenshot", "True",
+            "--max_steps", "30",
         ])
         try:
             stdout, stderr = process.communicate(timeout=300)
@@ -144,7 +174,11 @@ def run_asi():
         model_name = args.model.replace("/", "_")
         process.wait()
         path = f"results/webarena.{tid}/{model_name}_autoeval.json"
-        is_correct = json.load(open(path))[0]["rm"]  # bool
+        try:
+            is_correct = json.load(open(path))[0]["rm"]  # bool
+        except Exception as e:
+            print(f"Error loading JSON file: {e}")
+            is_correct = False
         if not is_correct: continue
         # input("[2.1] Completed evaluated trajectory (true)")
         process = Popen([
@@ -171,14 +205,18 @@ def run_asi():
             print(f"Process timed out after {e.timeout} seconds.")
             print(stderr)
         # input("[3] Completed induced workflow")
+    
 
         # intermediate supervision
         # cont = input("Continue? (y/n)")
 
-
 # %% Verified, Program
 def run_veri_program():
     task_id_list = parse_task_ids(args.task_ids)
+    
+    # Initialize counter for processed tasks
+    processed_tasks = 0
+    
     for tid in task_id_list:
         # step 1: task solving with memory input
         process = Popen([
@@ -240,6 +278,28 @@ def run_veri_program():
             with open(f"workflows/{args.website}.txt", 'a') as f:
                 f.write(new_content + "\n\n")
         # input("[3] Completed induced workflow")
+
+        # Increment counter for successfully processed tasks
+        processed_tasks += 1
+        
+        # Save induced actions every save_interval steps
+        if processed_tasks % args.save_interval == 0:
+            # Create backup directory if it doesn't exist
+            backup_dir = f"actions/backups"
+            os.makedirs(backup_dir, exist_ok=True)
+            
+            # Create timestamped backup of the actions file
+            timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+            backup_filename = f"{args.website}_step_{processed_tasks}_{timestamp}.py"
+            backup_path = os.path.join(backup_dir, backup_filename)
+            
+            # Copy the current actions file to backup
+            actions_file = f"actions/{args.website}.py"
+            if os.path.exists(actions_file):
+                shutil.copy2(actions_file, backup_path)
+                print(f"Saved induced actions backup to {backup_path} after {processed_tasks} processed tasks")
+            else:
+                print(f"Warning: Actions file {actions_file} not found for backup")
 
         # intermediate supervision
         # cont = input("Continue? (y/n)")
@@ -342,13 +402,16 @@ def run_asi_vanilla():
     task_id_list = filter_by_website(task_id_list, args.websites)
     print(f"Filtered task ids: {len(task_id_list)}")
     
-    for tid in task_id_list:
+    for tid in tqdm(task_id_list, desc="Processing tasks", total=len(task_id_list)):
         process = Popen([
             "python", "run_demo.py",
             "--task_name", f"webarena.{tid}",
             "--websites", args.websites,
             "--headless",
             "--model_name", args.model,
+            "--use_screenshot", "True",
+            "--max_steps", "20",
+            "--output_dir", "results_asi_vanilla_gpt-4o",
         ])
         try:
             stdout, stderr = process.communicate(timeout=300)
@@ -371,6 +434,7 @@ if __name__ == "__main__":
                         help="xxx-xxx,xxx-xxx")
     parser.add_argument("--model", type=str, required=True)
     parser.add_argument("--seed", type=int, default=42)
+    parser.add_argument("--save_interval", type=int, default=10)
     
     args = parser.parse_args()
 

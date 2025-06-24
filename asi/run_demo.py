@@ -72,7 +72,7 @@ def parse_args():
         help="Name of the website(s) to run the agent on. Used to define agent's action space.",
     )
     parser.add_argument(
-        "--max_steps", type=int, default=10,
+        "--max_steps", type=int, default=30,
         help="Maximum number of steps to run the agent.",
     )
     
@@ -89,6 +89,10 @@ def parse_args():
     parser.add_argument(
         "--rename_to", type=str, default=None,
         help="If specified, rename the experiment folder to the specified name.",
+    )
+    parser.add_argument(
+        "--output_dir", type=str, default="results",
+        help="Path to the output directory.",
     )
     parser.add_argument("--headless", action="store_true", help="Run the browser in headless mode.")
 
@@ -159,7 +163,7 @@ https://github.com/ServiceNow/AgentLab"""
     )
 
     # running and logging results
-    exp_args.prepare("./results")
+    exp_args.prepare(args.output_dir)
     exp_args.run()
 
     # loading and printing results
@@ -170,9 +174,9 @@ https://github.com/ServiceNow/AgentLab"""
         print(f"{key}: {val}")
     
     if args.rename_to is not None:
-        if os.path.exists(f"results/{args.rename_to}"):
-            shutil.rmtree(f"results/{args.rename_to}")
-        os.rename(exp_args.exp_dir, f"results/{args.rename_to}")
+        if os.path.exists(f"{args.output_dir}/{args.rename_to}"):
+            shutil.rmtree(f"{args.output_dir}/{args.rename_to}")
+        os.rename(exp_args.exp_dir, f"{args.output_dir}/{args.rename_to}")
 
 
 if __name__ == "__main__":

@@ -84,4 +84,5 @@ CLIENT_DICT = {
     "gpt-4o-2024-05-13": GPT4V_Client,
     "anthropic/claude-sonnet-4": GPT4V_Client,
     "openai/gpt-4o": GPT4V_Client,
+    "gpt-4.1": GPT4V_Client,
 }

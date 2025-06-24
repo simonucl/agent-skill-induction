@@ -96,7 +96,7 @@ def induce_actions() -> list[str] | None:
     messages = [{"role": "system", "content": open(args.sys_msg_path).read()}]
     messages += [{"role": "user", "content": open(args.instruction_path).read()}]
     messages += [{"role": "user", "content": open(args.few_shot_path).read()}]
-    # messages += [{"role": "user", "content": "## Existing Actions\n" + open(args.write_action_path).read()}]
+    messages += [{"role": "user", "content": "## Existing Actions\n" + open(args.write_action_path).read()}]
     messages += [{"role": "user", "content": test_query + '\n\n## Reusable Functions'}]
 
     all_responses = []
